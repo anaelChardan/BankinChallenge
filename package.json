@@ -1,5 +1,32 @@
 {
+  "name": "bankinchallenge",
+  "version": "0.0.1",
+  "license": "UNLICENSED",
+  "author": {
+    "name": "Anaël Chardan",
+    "email": "anael.chardan@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anaelChardan/BankinChallenge"
+  },
+  "main": "index.js",
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "scrap": "node ./dist/index.js",
+    "test": "yarn build && yarn scrap",
+    "test:debug": "env DEBUG=\"*\" env DEBUG_COLORS=true yarn scrap 2>&1 | grep -v Network"
+  },
   "dependencies": {
-    "puppeteer": "^0.13.0"
+    "better-queue": "^3.8.6",
+    "puppeteer": "^0.13.0",
+    "tsc": "^1.20150623.0",
+    "typescript": "^2.6.2"
+  },
+  "devDependencies": {
+    "@types/puppeteer": "^0.13.9"
   }
 }
