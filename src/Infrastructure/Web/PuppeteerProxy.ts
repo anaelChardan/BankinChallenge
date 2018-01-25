@@ -10,7 +10,7 @@ class PuppeteerProxy {
      * Provide a browser and launch it
      */
     public async getAndLaunchBrowser() : Promise<Browser> {
-        return await launch({timeout: this.timeout, headless: false});
+        return await launch({timeout: this.timeout, headless: true});
     }
 
     /**

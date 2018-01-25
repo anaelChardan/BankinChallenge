@@ -2,6 +2,9 @@ import { Browser, Page, Dialog, ElementHandle, Frame, FrameBase } from "puppetee
 import PuppeteerProxy from "./PuppeteerProxy";
 import BankinTransactionRow from "./BankinTransactionRow";
 
+/**
+ * Represent the way to scrap a page
+ */
 class BankinTransactionPage {
     readonly BANKIN_TRANSACTION_PAGE_BASE_URL = 'https://web.bankin.com/challenge/index.html?start='
     readonly TRANSACTIONS_TABLE_WIDTH = 3;
@@ -13,6 +16,11 @@ class BankinTransactionPage {
 
     constructor(private page: Page, private from: number, private puppeteerProxy: PuppeteerProxy) {}
 
+    /**
+     * Get Transactions as a Row
+     * 
+     * @returns {Promise<BankinTransactionRow[] | any>} the result of the scrapping
+     */
     async getRawTransactions(): Promise<BankinTransactionRow[] | any> {
         return new Promise<BankinTransactionRow[] | any>(async (resolve, reject) => {
             this.page.on('dialog', async (dialog: Dialog) => await this.dialogHandler(dialog));
@@ -22,7 +30,6 @@ class BankinTransactionPage {
                     const rawTransactions = await this.getRawTransactionsFromPage();
                     resolve(rawTransactions);
                 } catch(exception) {
-                    console.log(exception);
                     reject(exception);
                 }
             });
@@ -31,17 +38,27 @@ class BankinTransactionPage {
         });
     }
 
+    /**
+     * Will click ok on the dialog, to continue and then click on the reload button
+     *
+     * @param {Dialog} dialog the dialog to interact with
+     */
     private async dialogHandler(dialog: Dialog): Promise<void> {
         await dialog.dismiss();
         await this.puppeteerProxy.clickOn(this.page, this.BUTTON_RELOAD_CSS_SELECTOR);
     }
 
+    /**
+     * 
+     */
     private async getRawTransactionsFromPage(): Promise<BankinTransactionRow[]> {
+        //Will return the first promise which answer, so the real transactions container
         const containerElement: FrameBase = await Promise.race<Frame, Page>([
             this.getIframeContainer(),
             this.getTransactionsTableBody()
         ]);
 
+        //Wait for a row, because it can be the header only (last page)
         await containerElement.waitForSelector(this.TRANSACTIONS_TABLE_ROW_CSS_SELECTOR);
 
         const transactionsCells: string[] = await containerElement
@@ -53,15 +70,25 @@ class BankinTransactionPage {
         return this.chunk(transactionsCells, this.TRANSACTIONS_TABLE_WIDTH).map(row => new BankinTransactionRow(row));
     }
 
+    /**
+     * Return the frame container of transactions
+     * 
+     * @returns {Promise<Frame>} the frame if it contains a frame
+     */
     private async getIframeContainer(): Promise<Frame> {
-        await this.page.waitForSelector('iframe')
+        await this.puppeteerProxy.waitForSelector(this.page, 'iframe')
         const frame: Frame = this.page.frames().find(frame => this.TRANSACTIONS_FRAME_CSS_ID === frame.name())
 
         return Promise.resolve(frame)
     }
 
+    /**
+     * Return the table container of transactions
+     * 
+     * @returns {Promise<Page>} the page if it contains the table directly
+     */
     private async getTransactionsTableBody(): Promise<Page> {
-        await this.page.waitForSelector(this.TRANSACTIONS_TABLE_BODY_SELECTOR);
+        await this.puppeteerProxy.waitForSelector(this.page, this.TRANSACTIONS_TABLE_BODY_SELECTOR);
 
         return Promise.resolve(this.page);
     }

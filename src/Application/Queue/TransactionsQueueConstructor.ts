@@ -1,6 +1,9 @@
-import Transaction from "../Domain/Transaction";
+import Transaction from "../../Domain/Transaction";
 import TaskResult from "./TaskResult";
 
+/**
+ * Constructor that should respect a queue
+ */
 interface TransactionsQueueConstructor {
     new (
         concurrentTasks: number,

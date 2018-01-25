@@ -1,5 +1,5 @@
 class Transaction {
-    constructor(private account: String, private transaction: String, private amount: number, private currency: String) {}
+    constructor(public id: number, private account: String, private transaction: String, private amount: number, private currency: String) {}
 
     toJsonObject() {
         return {
